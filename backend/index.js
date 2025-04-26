@@ -1,14 +1,24 @@
-import { createServer } from 'http'
 import { Server } from 'socket.io'
+import express from 'express'
+import path  from 'path'
+import { fileURLToPath } from 'url'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-const httpServer = createServer()
+const app = express()
+const PORT = process.env.PORT || 3500
+const expressServer = app.listen(PORT, () => {
+    console.log(`Listening on ${PORT}`)
+})
 
-const io = new Server(httpServer, {
+app.use(express.static(path.join(__dirname, "public")))
 
-    // normally we do cors and allow it for everything is accepted no one is blocked and anyone can access it from anywhere
+const io = new Server(expressServer, {
+
+    // when you host the frontend, replace the false part (which is actually true) with the frontend hosting address
     cors: {
-        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5500", "http://127.0.0.1:5500"] // 5500 is for the live server port
+        origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5500", "http://127.0.0.1:5500"]
     } 
 })
 
@@ -16,10 +26,8 @@ io.on('connection', socket => {
     console.log(`User ${socket.id} connected`)
 
     socket.on('message', data => {
-        console.log(data) // to see what we have recieved
+        console.log(data)
         
-        io.emit('message', `${socket.id.substring(0,5)} : ${data}`) // instead of send, emit will 'emit' the message to everyone in the server
+        io.emit('message', `${socket.id.substring(0,5)} : ${data}`)
     })
 })
-
-httpServer.listen(3500, () => console.log("Listening on port 3500"))
