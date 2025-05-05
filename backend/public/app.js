@@ -1,4 +1,4 @@
-const socket = io('https://simplechatapp-x1kt.onrender.com')
+const socket = io('https://simplechatapp-x1kt.onrender.com') // backend hosting link on which the socket instance is created
 
 const msgInput = document.querySelector('#message')
 const nameInput = document.querySelector('#name')
@@ -9,8 +9,11 @@ const roomList = document.querySelector('.room-list')
 const chatDisplay = document.querySelector('.chat-display')
 
 function sendMessage(e) {
-    e.preventDefault()
+
+    e.preventDefault() // so that it doesn't submit by default
+
     if (nameInput.value && msgInput.value && chatRoom.value) {
+        // instead of send, emit spreads the message to every user instead of sending the message to specific user
         socket.emit('message', {
             name: nameInput.value,
             text: msgInput.value
@@ -20,6 +23,7 @@ function sendMessage(e) {
     msgInput.focus()
 }
 
+// name input && chat room id (value)
 function enterRoom(e) {
     e.preventDefault()
     if (nameInput.value && chatRoom.value) {
@@ -40,14 +44,17 @@ msgInput.addEventListener('keypress', () => {
     socket.emit('activity', nameInput.value)
 })
 
-// Listen for messages 
+// Listen for messages
 socket.on("message", (data) => {
+
     activity.textContent = ""
     const { name, text, time } = data
     const li = document.createElement('li')
     li.className = 'post'
     if (name === nameInput.value) li.className = 'post post--left'
     if (name !== nameInput.value && name !== 'Admin') li.className = 'post post--right'
+
+    // Admin
     if (name !== 'Admin') {
         li.innerHTML = `<div class="post__header ${name === nameInput.value
             ? 'post__header--user'
@@ -65,6 +72,7 @@ socket.on("message", (data) => {
     chatDisplay.scrollTop = chatDisplay.scrollHeight
 })
 
+// is typing... -  dynamic function
 let activityTimer
 socket.on("activity", (name) => {
     activity.textContent = `${name} is typing...`
@@ -84,6 +92,7 @@ socket.on('roomList', ({ rooms }) => {
     showRooms(rooms)
 })
 
+// Show users
 function showUsers(users) {
     usersList.textContent = ''
     if (users) {
@@ -97,6 +106,7 @@ function showUsers(users) {
     }
 }
 
+// Show Rooms
 function showRooms(rooms) {
     roomList.textContent = ''
     if (rooms) {
